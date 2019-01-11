@@ -1,0 +1,3 @@
+dubbo=com.presell.dubbo.spi.dubbo.spi.TestDubbo
+spring=com.presell.dubbo.spi.dubbo.spi.TestSpring
+world=com.presell.dubbo.spi.dubbo.spi.TestWorld

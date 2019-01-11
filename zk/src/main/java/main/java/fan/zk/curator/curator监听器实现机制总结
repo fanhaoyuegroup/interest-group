@@ -1,0 +1,19 @@
+curator 的监听器采用 3 种 Watcher 机制来监听节点变化
+1. Path Cache：监视一个路径下孩子节点的建立，删除，以及节点数据更新，使用的监听事件监听类：PathChildrenCacheListener;
+
+2. Node Cache: 监视一个节点的创建、更新、删除，并将节点数据更新至本地
+
+3. Tree Cache：Path Cache 和 Node Cache 的结合体，监视路径下创建，更新，删除事件，并缓存路径下所有孩子节点的数据
+
+状态信息 stat 的属性说明
+cZxid	 数据节点创建时的事务ID
+ctime	 数据节点创建时的时间
+mZxid	 数据节点最后一次更新时的事务ID
+mtime	 数据节点最后一次更新时的时间
+pZxid	 数据节点的子节点列表最后一次被修改（是子节点列表变更，而不是子节点内容变更）时的事务ID
+cversion	 子节点的版本号
+dataVersion	 数据节点的版本号
+aclVersion	 数据节点的ACL版本号
+ephemeralOwner 	 如果节点是临时节点，则表示创建该节点的会话的SessionID；如果节点是持久节点，则该属性值为0
+dataLength	 数据内容的长度
+numChildren	 数据节点当前的子节点个数

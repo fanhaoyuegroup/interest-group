@@ -1,0 +1,131 @@
+zookeeper原生API注册Watcher需要反复注册，即Watcher触发之后就需要重新进行注册。
+另外，客户端断开之后重新连接到服务器也是需要一段时间。这就导致了zookeeper客户端不能够接收全部的zookeeper事件。
+zookeeper保证的是数据的最终一致性。因此，对于此问题需要特别注意，在不要对zookeeper事件进行强依赖。
+
+
+
+zookeeper机制的特点
+
+zookeeper的getData()，getChildren()和exists()方法都可以注册watcher监听。而监听有以下几个特性：
+
+
+一次性触发（one-time trigger）
+ 当数据改变的时候，那么一个Watch事件会产生并且被发送到客户端中。但是客户端只会收到一次这样的通知，如果以后这个数据再次发生改变的时候，
+ 之前设置Watch的客户端将不会再次收到改变的通知，因为Watch机制规定了它是一个一次性的触发器。
+
+当设置监视的数据发生改变时，该监视事件会被发送到客户端，例如，如果客户端调用了 getData(“/znode1”, true) 并且稍后 /znode1 节点上的数
+据发生了改变或者被删除了，客户端将会获取到 /znode1 发生变化的监视事件，而如果 /znode1 再一次发生了变化，除非客户端再次对 /znode1 设置
+监视，否则客户端不会收到事件通知。
+发送给客户端（Sent to the client）
+这个表明了Watch的通知事件是从服务器发送给客户端的，是异步的，这就表明不同的客户端收到的Watch的时间可能不同，但是ZooKeeper有保证：当一个
+客户端在看到Watch事件之前是不会看到结点数据的变化的。例如：A=3，此时在上面设置了一次Watch，如果A突然变成4了，那么客户端会先收到Watch事
+件的通知，然后才会看到A=4。
+
+
+Zookeeper 客户端和服务端是通过 Socket 进行通信的，由于网络存在故障，所以监视事件很有可能不会成功地到达客户端，监视事件是异步发送至监视
+者的，Zookeeper 本身提供了保序性(ordering guarantee)：即客户端只有首先看到了监视事件后，才会感知到它所设置监视的 znode 发生了变化
+(a client will never see a change for which it has set a watch until it first sees the watch event). 网络延迟或者其他因素
+可能导致不同的客户端在不同的时刻感知某一监视事件，但是不同的客户端所看到的一切具有一致的顺序。
+
+
+被设置了watch的数据（The data for which the watch was set）
+这是指节点发生变动的不同方式。你可以认为ZooKeeper维护了两个watch列表：data watch和child watch。getData()和exists()设置data watch，
+而getChildren()设置child watch。或者，可以认为watch是根据返回值设置的。getData()和exists()返回节点本身的信息，而getChildren()返回
+子节点的列表。因此，setData()会触发znode上设置的data watch（如果set成功的话）。一个成功的 create() 操作会触发被创建的znode上的数据watch，
+以及其父节点上的child watch。而一个成功的 delete()操作将会同时触发一个znode的data watch和child watch（因为这样就没有子节点了），
+同时也会触发其父节点的child watch。
+
+
+Watch由client连接上的ZooKeeper服务器在本地维护。这样可以减小设置、维护和分发watch的开销。当一个客户端连接到一个新的服务器上时，
+watch将会被以任意会话事件触发。当与一个服务器失去连接的时候，是无法接收到watch的。而当client重新连接时，如果需要的话，所有先前注册
+过的watch，都会被重新注册。通常这是完全透明的。只有在一个特殊情况下，watch可能会丢失：对于一个未创建的znode的exist watch，
+如果在客户端断开连接期间被创建了，并且随后在客户端连接上之前又删除了，这种情况下，这个watch事件可能会被丢失。
+
+
+
+ZooKeeper对Watch提供了什么保障
+
+对于watch，ZooKeeper提供了这些保障：
+
+
+Watch与其他事件、其他watch以及异步回复都是有序的。 ZooKeeper客户端库保证所有事件都会按顺序分发。
+客户端会保障它在看到相应的znode的新数据之前接收到watch事件。//这保证了在process()再次利用zk client访问时数据是存在的
+从ZooKeeper接收到的watch事件顺序一定和ZooKeeper服务所看到的事件顺序是一致的。
+
+
+
+
+关于Watch的一些值得注意的事情
+
+
+Watch是一次性触发器，如果得到了一个watch事件，而希望在以后发生变更时继续得到通知，应该再设置一个watch。
+因为watch是一次性触发器，而获得事件再发送一个新的设置watch的请求这一过程会有延时，所以无法确保看到了所有发生在ZooKeeper上的 一个节点
+上的事件。所以请处理好在这个时间窗口中可能会发生多次znode变更的这种情况。（可以不处理，但至少要意识到这一点）。//也就是说,在process()
+中如果处理得慢而没有注册new watch时,在这期间有其它事件出现时是不会通知!!
+一个watch对象或一个函数/上下文对，为一个事件只会被通知一次。比如，如果同一个watch对象在同一个文件上分别通过exists和getData注册了两次，
+而这个文件之后被删除了，这时这个watch对象将只会收到一次该文件的deletion通知。//同一个watch注册同一个节点多次只会生成一个event。
+当从一个服务器上断开时（比如服务器出故障了），在再次连接上之前，将无法获得任何watch。请使用这些会话事件来进入安全模式：在disconnected
+状态下将不会收到事件，所以程序在此期间应该谨慎行事。
+
+
+
+
+总结
+
+经过上面的描述，对于上一篇博客中连续修改节点内容部分监听事件丢失的原因也就变得显而易见了。虽然curator帮开发人员封装了重复注册监听的过程，
+但是内部依旧需要重复进行注册，而在第一个watcher触发第二个watcher还未注册成功的间隙，进行节点数据的修改，显然无法收到watcher事件。
+
+
+
+所 有的Zookeeper读操作，包括getData()、getChildren()和exists()，都有一个开关，可以在操作的同时再设置一个 watch。在ZooKeeper中，
+Watch是一个一次性触发器，会在被设置watch的数据发生变化的时候，发送给设置watch的客户端。 watch的定义中有三个关键点：
+
+一次性触发器
+
+一 个watch事件将会在数据发生变更时发送给客户端。例如，如果客户端执行操作getData(“/znode1″, true)，而后 /znode1 发生变更或是删除了，
+客户端都会得到一个  /znode1 的watch事件。如果  /znode1 再次发生变更，则在客户端没有设置新的watch的情况下，是不会再给这个客户端发送watch事件的。
+
+发送给客户端
+
+这 就是说，一个事件会发送向客户端，但可能在在操作成功的返回值到达发起变动的客户端之前，这个事件还没有送达watch的客户端。Watch是异步发送 的。
+但ZooKeeper保证了一个顺序：一个客户端在收到watch事件之前，一定不会看到它设置过watch的值的变动。网络时延和其他因素可能会导 致不同的客户端
+看到watch和更新返回值的时间不同。但关键点是，每个客户端所看到的每件事都是有顺序的。
+
+被设置了watch的数据
+
+这 是指节点发生变动的不同方式。你可以认为ZooKeeper维护了两个watch列表：data watch和child watch。getData()和exists()设置data watch，
+而getChildren()设置child watch。或者，可以认为watch是根据返回值设置的。getData()和exists()返回节点本身的信息，而getChildren()返回
+子节点的列表。因此，setData()会触发znode上设置的data watch（如果set成功的话）。一个成功的 create() 操作会触发被创建的znode上的数据watch，
+以及其父节点上的child watch。而一个成功的 delete()操作将会同时触发一个znode的data watch和child watch（因为这样就没有子节点了），
+同时也会触发其父节点的child watch。
+
+Watch 由client连接上的ZooKeeper服务器在本地维护。这样可以减小设置、维护和分发watch的开销。当一个客户端连接到一个新的服务器上 时，
+watch将会被以任意会话事件触发。当与一个服务器失去连接的时候，是无法接收到watch的。而当client重新连接时，如果需要的话，所有先 前注册过
+的watch，都会被重新注册。通常这是完全透明的。只有在一个特殊情况下，watch可能会丢失：对于一个未创建的znode的exist watch，如果在客户端
+断开连接期间被创建了，并且随后在客户端连接上之前又删除了，这种情况下，这个watch事件可能会被丢失。
+
+
+ZooKeeper对Watch提供了什么保障
+对于watch，ZooKeeper提供了这些保障：
+
+Watch与其他事件、其他watch以及异步回复都是有序的。 ZooKeeper客户端库保证所有事件都会按顺序分发。
+
+客户端会保障它在看到相应的znode的新数据之前接收到watch事件。//这保证了在process()再次利用zk client访问时数据是存在的
+
+从ZooKeeper接收到的watch事件顺序一定和ZooKeeper服务所看到的事件顺序是一致的。
+
+
+关于Watch的一些值得注意的事情
+Watch是一次性触发器，如果你得到了一个watch事件，而你希望在以后发生变更时继续得到通知，你应该再设置一个watch。
+
+因 为watch是一次性触发器，而获得事件再发送一个新的设置watch的请求这一过程会有延时，所以你无法确保你看到了所有发生在ZooKeeper上的 一个
+节点上的事件。所以请处理好在这个时间窗口中可能会发生多次znode变更的这种情况。（你可以不处理，但至少请认识到这一点）。//也就是说,在process()
+中如果处理得慢而没有注册new watch时,在这期间有其它事件出现时是不会通知!!之前可能就是没有意识到这点所以才引出本话题***********
+
+一个watch对象或一个函数/上下文对，为一个事件只会被通知一次。比如，如果同一个watch对象在同一个文件上分别通过exists和getData注册了两次，
+而这个文件之后被删除了，这时这个watch对象将只会收到一次该文件的deletion通知。//同一个watch注册同一个节点多次只会生成一个event.这里我想
+到如果一个watch注册不同的node,也应当出现多个event?
+
+当你从一个服务器上断开时（比如服务器出故障了），在再次连接上之前，你将无法获得任何watch。请使用这些会话事件来进入安全模式：在disconnected
+状态下你将不会收到事件，所以你的程序在此期间应该谨慎行事。
+
