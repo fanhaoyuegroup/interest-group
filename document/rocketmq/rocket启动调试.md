@@ -119,8 +119,7 @@ export ROCKETMQ_HOME
 sh ${ROCKETMQ_HOME}/bin/runbroker.sh org.apache.rocketmq.broker.BrokerStartup $@
 ```
 
-2、1首先启动 namesrv
-会出现以下错误：
+2、1首先启动 namesrv会出现以下错误：
 
 ![avatar](img/1547200278740_图片.png)
 
