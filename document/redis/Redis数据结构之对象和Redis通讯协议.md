@@ -45,7 +45,20 @@ typedef struct redisObject {
 
 2、redis的五大对象
 
-（1）字符串对象（redis_string）
+（1）字符串对象（REDIS_STRING）
+![sds对象](img/sds.png)
+
+（2）列表对象（REDIS_LIST）
+![list对象](img/redis_list.png)
+
+压缩列表对象
+![zipList对象](img/redis_zipList.png)
+（3）集合对象（REDIS_SET）
+![set对象](img/redis_set.png)
+（4）有序集合（REDIS_ZSET）
+![zset对象](img/redis_zset.png)
+（5）哈希对象（REDIS_HASH）
+![hash对象](img/redis_hash.png)
 
 
 3.对象共享
@@ -59,7 +72,7 @@ c不具备内存回收功能，Redis在自己对象机制上实现了引用计�
 
 - 当创建一个对象或者该对象被重新使用时，它的引用计数++；
 - 当一个对象不再被使用时，它的引用计数--；
-- 当一个对象的引用计数为0时，释放该对象内存资源。
+- 当一个对象的引用计数为0时，释放该对象内存资源（摘自于《redis的设计与实现》,但是在源码中可见，当refcount为1是就进行了释放的相关判断）。
 
 5.对象时空转长
 
@@ -90,6 +103,7 @@ OK
 
 （3）发送回复内容给client
 
+源码内容较多，可参考下面这个
 https://blog.csdn.net/hangbo216/article/details/53909302
 
 2.通讯协议格式描述：
