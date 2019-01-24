@@ -29,7 +29,7 @@
              treeifyBin(tab, hash);
 ```     
 我们来看下树化的源码：
-```java
+``` java
   //树化
     final void treeifyBin(Node<K,V>[] tab, int hash) {
         int n, index; Node<K,V> e;
@@ -62,7 +62,7 @@
   
 ```
 resize中调用的方法：当结点是树的时候，调用split()
-```java
+``` java
 
     else if (e instanceof TreeNode)
                         ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
@@ -71,8 +71,8 @@ resize中调用的方法：当结点是树的时候，调用split()
                         tab[index] = loHead.untreeify(map);
 ```
 上面只是将链表的结构转化为树的结构，treeify()才是真正生成红黑树
-
-```java
+ 
+``` java
      //
             final void treeify(Node<K,V>[] tab) {
                 TreeNode<K,V> root = null;
@@ -148,7 +148,7 @@ resize中调用的方法：当结点是树的时候，调用split()
 - 每个红色节点的两个子节点都是黑色。(从每个叶子到根的所有路径上不能有两个连续的红色节点)
 - 从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点
 
-```java
+``` java
              //
              static <K,V> TreeNode<K,V> balanceInsertion(TreeNode<K,V> root,
                                                                 TreeNode<K,V> x) {
@@ -199,27 +199,10 @@ resize中调用的方法：当结点是树的时候，调用split()
                                         }
                                     }
                                 }
-                            }             
-                            else {          
-                                if (xppl != null && xppl.red) {
-                                    xppl.red = false;
-                                    xp.red = false;
-                                    xpp.red = true;
-                                    x = xpp;
-                                }
-                                else {
-                                    if (x == xp.left) {
-                                        root = rotateRight(root, x = xp);
-                                        xpp = (xp = x.parent) == null ? null : xp.parent;
-                                    }
-                                    if (xp != null) {
-                                        xp.red = false;
-                                        if (xpp != null) {
-                                            xpp.red = true;
-                                            root = rotateLeft(root, xpp);
-                                        }
-                                    }
-                                }
+                            }   
+                          
+                             //父亲是爷爷的右边          
+                            .....
                             }
                         }
                     }
@@ -228,7 +211,7 @@ resize中调用的方法：当结点是树的时候，调用split()
 
 ![红黑树示例图](img/TreeMap.png)
 
-```java
+``` java
         //左旋   该例子中传入的值为（80,40）
         static <K,V> TreeNode<K,V> rotateLeft(TreeNode<K,V> root,
                                               TreeNode<K,V> p) {
@@ -254,7 +237,7 @@ resize中调用的方法：当结点是树的时候，调用split()
  ```
  ![左旋](img/左旋.jpg)
        
- ```java
+ ``` java
         //右旋  该例子中传入的参数是（80,80）
         static <K,V> TreeNode<K,V> rotateRight(TreeNode<K,V> root,
                                                TreeNode<K,V> p) {
@@ -282,7 +265,7 @@ resize中调用的方法：当结点是树的时候，调用split()
  ![右旋](img/右旋.jpg)
 
 解除树化
-```java
+``` java
 //解除就没有树化那么。。。
     原来的红黑树中也实现了双向链表，所以在这里就是将原来TreeNode->Node
  final Node<K,V> untreeify(HashMap<K,V> map) {
