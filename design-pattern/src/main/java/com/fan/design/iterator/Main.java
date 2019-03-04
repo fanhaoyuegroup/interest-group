@@ -14,7 +14,7 @@ import java.util.List;
  * @since 2019-03-04
  */
 public class Main {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         List lipstick = Lists.newArrayList();
         lipstick.add("DIOR");
         lipstick.add("MAC");
@@ -24,15 +24,15 @@ public class Main {
         LipstickList lipstickList = new LipstickList(lipstick);
 
         AbstractIterator iterator = lipstickList.createIterator();
-        while (iterator.hasNext()){
-            System.out.println(iterator.getNextItem()+"\n");
+        while (iterator.hasNext()) {
+            System.out.println(iterator.getNextItem() + "\n");
         }
 
         FoodList foodList = new FoodList(lipstick);
 
         AbstractIterator foodIterator = foodList.createIterator();
-        while (foodIterator.hasNext()){
-            System.out.println(foodIterator.getNextItem()+"\n");
+        while (foodIterator.hasNext()) {
+            System.out.println(foodIterator.getNextItem() + "\n");
         }
     }
 }

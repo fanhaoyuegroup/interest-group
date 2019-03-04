@@ -18,6 +18,7 @@ public interface AbstractIterator {
 
     /**
      * 获取下一个元素
+     *
      * @return
      */
     Object getNextItem();

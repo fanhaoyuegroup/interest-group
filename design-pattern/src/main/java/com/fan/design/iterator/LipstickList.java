@@ -12,7 +12,7 @@ import java.util.List;
  * @since 2019-03-04
  * 具体聚合类
  */
-public class LipstickList extends AbstractMyList{
+public class LipstickList extends AbstractMyList {
     public LipstickList(List objects) {
         super(objects);
     }
