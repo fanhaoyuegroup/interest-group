@@ -27,5 +27,12 @@ public class Main {
         while (iterator.hasNext()){
             System.out.println(iterator.getNextItem()+"\n");
         }
+
+        FoodList foodList = new FoodList(lipstick);
+
+        AbstractIterator foodIterator = foodList.createIterator();
+        while (foodIterator.hasNext()){
+            System.out.println(foodIterator.getNextItem()+"\n");
+        }
     }
 }
