@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2016 Hangzhou 2Dfire Technology Co., Ltd. All rights reserved
  */
-package java.com.fanhaoyue.algorithm;
+package com.fanhaoyue.algorithm;
 
 /**
  * SnowflakeIdWorker

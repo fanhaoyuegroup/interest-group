@@ -1,4 +1,4 @@
-package java.com.fanhaoyue.algorithm;
+package com.fanhaoyue.algorithm;
 
 /**
  * Class description
