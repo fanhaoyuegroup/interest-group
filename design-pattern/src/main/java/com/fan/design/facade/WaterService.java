@@ -1,0 +1,16 @@
+/*
+ * Copyright (C) 2009-2017 Hangzhou 2Dfire Technology Co., Ltd.All rights reserved
+ */
+package com.fan.design.facade;
+
+/**
+ * WaterService
+ *
+ * @author lilu
+ * @since 2019-05-07
+ */
+public class WaterService {
+    public void readyWater(){
+        System.out.println("准备开水");
+    }
+}
