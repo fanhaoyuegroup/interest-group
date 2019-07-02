@@ -16,6 +16,9 @@ package com.fanhaoyue.algorithm;
  * 0 - 0000000000 0000000000 0000000000 0000000000 0 - 00000 - 00000 - 000000000000 <br>
  * SnowFlake的优点是，整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞(由数据中心ID和机器ID作区分)
  * @author cmz
+ * 线上生产环境架构设计文档
+ * http://k.2dfire.net/pages/viewpage.action?pageId=295043535
+ * @Author congbai@2dfire.com
  */
 public class SnowFlake {
 
