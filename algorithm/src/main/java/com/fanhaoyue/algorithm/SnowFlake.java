@@ -91,6 +91,8 @@ public class SnowFlake {
      */
     private long lastTimestamp = -1L;
 
+    private static SnowFlake snowFlake=new SnowFlake(3, 5);;
+
     /**
      * 构造函数
      *
@@ -253,6 +255,10 @@ public class SnowFlake {
         String blank = "                                                                        ";
         StringBuilder builder = new StringBuilder(blank);
         System.out.println(builder.replace(start, totalBit, explain));
+    }
+
+    public static Long getId(){
+        return snowFlake.nextId();
     }
 
     public static void main(String[] args) {

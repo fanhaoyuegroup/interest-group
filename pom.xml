@@ -16,6 +16,7 @@
         <junit.version>4.12</junit.version>
         <lombok.version>1.16.18</lombok.version>
         <guava.version>22.0</guava.version>
+        <jmh.version>1.21</jmh.version>
     </properties>
 
     <modules>
@@ -50,6 +51,19 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>${jmh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>${jmh.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
 
     </dependencies>
 
