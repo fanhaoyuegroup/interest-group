@@ -29,6 +29,7 @@
         <module>design-pattern</module>
         <module>algorithm</module>
         <module>dubbo</module>
+        <module>multi-thread</module>
     </modules>
 
     <dependencies>
