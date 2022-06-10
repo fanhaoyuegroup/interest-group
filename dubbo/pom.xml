@@ -13,7 +13,7 @@
     <artifactId>dubbo</artifactId>
 
     <properties>
-        <dubbo.version>2.6.5</dubbo.version>
+        <dubbo.version>2.6.12</dubbo.version>
     </properties>
 
     <dependencyManagement>
